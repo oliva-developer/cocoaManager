@@ -1,0 +1,67 @@
+# Entorno virtual
+apivenv/
+
+# Archivos compilados de Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Configuración y credenciales sensibles
+.env
+*.pem
+*.key
+*.crt
+
+# Archivos de base de datos SQLite
+*.sqlite3
+
+# Archivos de logs y caché
+*.log
+logs/
+*.out
+*.pid
+
+# Archivos de migraciones de Django que pueden ser generados
+**/migrations/__pycache__/
+**/migrations/*.pyc
+
+# Archivos estáticos y de usuario
+staticfiles/
+media/
+
+# Archivos de dependencias
+pip-log.txt
+
+# Configuración de IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependencias de Docker y contenedores
+*.dockerfile
+docker-compose.yml
+__MACOSX/
+
+# Archivos de cobertura de pruebas
+htmlcov/
+.coverage
+.tox/
+.nox/
+
+# Configuración de Celery
+celerybeat-schedule
+
+# Archivos de Redis
+redis_data/
+
+# Configuración de Gunicorn
+gunicorn.log
+gunicorn.error
+
+# Configuración de Postgres
+pgdata/
+
+# Archivos de almacenamiento temporales
+tmp/
