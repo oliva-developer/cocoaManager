@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.timezone import now
+from django.contrib.auth.models import User, AbstractUser
 
 class Collaborator(models.Model):
     firstname = models.CharField(max_length=100, verbose_name="Nombres")
@@ -115,7 +116,7 @@ class WorkingDayResource(models.Model):
         return f"En {self.working_day} se uso {self.units} de {self.article}"
     
 class SaleProduct(models.Model):
-    client = models.CharField(max_length=100, verbose_name="client", default="Ninguno")
+    client = models.CharField(max_length=100, verbose_name="Cliente", default="Ninguno")
     kilos = models.IntegerField(default=1, verbose_name="kilos")
     price_kilo = models.DecimalField(max_digits=18, decimal_places=2, default=1.00, verbose_name="Precio de Kilo")
     total = models.DecimalField(max_digits=18, decimal_places=2, default=1.00, verbose_name="Monto")
@@ -127,3 +128,13 @@ class SaleProduct(models.Model):
         
     def __str__(self):
         return f"A {self.client} se vendio {self.kilos} kilos de cacao por un total de {self.total} soles"
+
+class CustomUser(AbstractUser):
+    avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
+    
+    class Meta:
+        verbose_name = "Usuario"
+        verbose_name_plural = "Usuarios"  
+        
+    def __str__(self):
+        return f"{self.username}"

@@ -6,6 +6,8 @@ from apis_.views import (
     PurchaseDetailViewSet, ToolMaintenanceViewSet, WorkingDayViewSet,
     WorkingDayResourceViewSet, SaleProductViewSet
 )
+from django.conf.urls.static import static
+from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r'collaborators', CollaboratorViewSet)
@@ -22,3 +24,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

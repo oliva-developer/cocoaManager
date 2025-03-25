@@ -11,9 +11,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,10 +31,29 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+# JAZZMIN CONFIG
+STATICFILES_DIRS = [
+    BASE_DIR / "staticfiles",
+]
+JAZZMIN_SETTINGS = {
+    # title of the window (Will default to current_admin_site.site_title if absent or None)
+    "site_title": "OliSYS",
+    "site_header": "OliSYS",
+    "site_brand": "OliSYS",
+    "site_logo": "logo.jpg",
+    "login_logo": "logo.jpg",
+    "login_logo_dark": "logo.jpg",
+    "welcome_sign": 'Bienvenido(a) a Productora de Cacao "ALVAREZ EIRL"',
+    "copyright": "OliSYS EIRL",
+    "site_logo_classes": "img-thumbnail",
+    "user_avatar": "avatar",
+    "theme": "darkly",
+}
+AUTH_USER_MODEL = "apis_.CustomUser"
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

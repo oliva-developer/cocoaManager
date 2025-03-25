@@ -1,12 +1,14 @@
 from django.contrib import admin
+from django.contrib.auth.models import User, Group
 from .models import (
     Collaborator, Task, Article, Purchase, PurchaseDetail, 
-    ToolMaintenance, WorkingDay, WorkingDayResource, SaleProduct
+    ToolMaintenance, WorkingDay, WorkingDayResource, SaleProduct,
+    CustomUser
 )
-from django.contrib.auth.models import User, Group
+from django.utils.html import format_html
 
-admin.site.unregister(User)
 admin.site.unregister(Group)
+
 ## PRUEBAS
 class PurchaseDetailInline(admin.TabularInline):
     model = PurchaseDetail
@@ -37,15 +39,20 @@ class ArticleAdmin(admin.ModelAdmin):
 
 @admin.register(Purchase)
 class PurchaseAdmin(admin.ModelAdmin):
-    list_display = ('provider', 'date')
+    list_display = ('provider', 'date', 'get_details_names')
     search_fields = ('provider',)
     list_filter = ('date',)
     inlines = [PurchaseDetailInline]
+    
+    @admin.display(description='Detalles')
+    def get_details_names(self, obj):
+        details = obj.details.all()
+        return format_html("<br>".join([detail.article.name for detail in details]))
 
-@admin.register(PurchaseDetail)
-class PurchaseDetailAdmin(admin.ModelAdmin):
-    list_display = ('purchase', 'article', 'unit_cost', 'units')
-    search_fields = ('article__name', 'purchase__provider')
+# @admin.register(PurchaseDetail)
+# class PurchaseDetailAdmin(admin.ModelAdmin):
+#     list_display = ('purchase', 'article', 'unit_cost', 'units')
+#     search_fields = ('article__name', 'purchase__provider')
 
 @admin.register(ToolMaintenance)
 class ToolMaintenanceAdmin(admin.ModelAdmin):
@@ -59,12 +66,17 @@ class WorkingDayAdmin(admin.ModelAdmin):
     list_filter = ('date', 'is_done', 'is_canceled')
     inlines = [WorkingDayResourceInline]
 
-@admin.register(WorkingDayResource)
-class WorkingDayResourceAdmin(admin.ModelAdmin):
-    list_display = ('working_day', 'article', 'units')
-    search_fields = ('working_day__collaborator__firstname', 'working_day__task__name', 'article__name')
+# @admin.register(WorkingDayResource)
+# class WorkingDayResourceAdmin(admin.ModelAdmin):
+#     list_display = ('working_day', 'article', 'units')
+#     search_fields = ('working_day__collaborator__firstname', 'working_day__task__name', 'article__name')
 
 @admin.register(SaleProduct)
 class SaleProductAdmin(admin.ModelAdmin):
     list_display = ('client', 'kilos', 'price_kilo', 'total', 'discount')
     search_fields = ('client',)
+    
+@admin.register(CustomUser)
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'avatar')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
