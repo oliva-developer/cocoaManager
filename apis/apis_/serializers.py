@@ -37,6 +37,8 @@ class ToolMaintenanceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class WorkingDaySerializer(serializers.ModelSerializer):
+    resources = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    
     class Meta:
         model = WorkingDay
         fields = '__all__'

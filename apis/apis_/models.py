@@ -32,7 +32,7 @@ class Article(models.Model):
     ]
     name = models.CharField(max_length=255, verbose_name="Nombre")
     um = models.CharField(max_length=50, verbose_name="Unidad de Medida")  # Unidad de medida
-    stock = models.PositiveIntegerField(verbose_name="Existencias")
+    stock = models.DecimalField(max_digits=5, decimal_places=2, default=0.00,verbose_name="Existencias")
     type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='product', verbose_name="Tipo")
 
     class Meta:
@@ -76,8 +76,8 @@ class ToolMaintenance (models.Model):
     date = models.DateTimeField(default=now, verbose_name="Fecha de Reparación")
     
     class Meta:
-        verbose_name = "Mantenimiento de Herramienta"
-        verbose_name_plural = "Mantenimientos de Herramientas"
+        verbose_name = "Mantenimiento"
+        verbose_name_plural = "Mantenimientos"
         
     def __str__(self):
         return f"{self.article} atendido por {self.provider}"
@@ -104,9 +104,10 @@ class WorkingDay(models.Model):
         return f"{self.collaborator} - {self.task} ({self.date.strftime('%Y-%m-%d')})"
 
 class WorkingDayResource(models.Model):
-    working_day = models.ForeignKey(WorkingDay, on_delete=models.CASCADE, verbose_name="Jornada laboral")
+    working_day = models.ForeignKey(WorkingDay, on_delete=models.CASCADE, verbose_name="Jornada laboral", related_name="resources")
     article = models.ForeignKey(Article, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Recurso")
-    units = models.IntegerField(verbose_name="Cantidad")
+    units = models.DecimalField(max_digits=5, decimal_places=2, default=0.00,verbose_name="Cantidad")
+    
     
     class Meta:
         verbose_name = "Recurso de Jornada de Trabajo"

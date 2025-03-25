@@ -35,11 +35,12 @@ ALLOWED_HOSTS = []
 STATICFILES_DIRS = [
     BASE_DIR / "staticfiles",
 ]
+
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
     "site_title": "OliSYS",
     "site_header": "OliSYS",
-    "site_brand": "OliSYS",
+    "site_brand": "liSYS",
     "site_logo": "logo.jpg",
     "login_logo": "logo.jpg",
     "login_logo_dark": "logo.jpg",
@@ -47,8 +48,33 @@ JAZZMIN_SETTINGS = {
     "copyright": "OliSYS EIRL",
     "site_logo_classes": "img-thumbnail",
     "user_avatar": "avatar",
-    "theme": "darkly",
+    "custom_css": "css/custom_admin.css",
+    "hide_models": ["apis_.PurchaseDetail", "apis_.WorkingDayResource"],
+    "icons": {
+        "apis_.Article": "fa-solid fa-tag",
+        "apis_.Collaborator": "fa-solid fa-user-tie",
+        "apis_.Purchase": "fa-solid fa-cart-shopping",
+        "apis_.ToolMaintenance": "fa-solid fa-screwdriver-wrench",
+        "apis_.CustomUser": "fa-solid fa-user",
+        "apis_.WorkingDay": "fas fa-calendar-day",
+        "apis_.Task": "fas fa-calendar-day",
+        "apis_.SaleProduct": "fa-solid fa-money-bill-trend-up",
+    },
+    # "custom_links": {
+    #     "apis_": [{
+    #             "name": "Artículos",
+    #             "url": "/admin/apis_/article/",
+    #             "icon": "fas fa-product",
+    #             # "permissions": ["books.view_book"]     
+    #         },
+    #     ]
+    # },
 }
+
+JAZZMIN_UI_TWEAKS = {
+    "theme" : "lux"
+}
+
 AUTH_USER_MODEL = "apis_.CustomUser"
 # Application definition
 
