@@ -28,7 +28,7 @@ logs/
 
 # Archivos estáticos y de usuario
 staticfiles/
-media/
+# media/
 
 # Archivos de dependencias
 pip-log.txt

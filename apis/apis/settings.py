@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 
 # JAZZMIN CONFIG
 STATICFILES_DIRS = [
-    BASE_DIR / "staticfiles",
+    BASE_DIR / "static",
 ]
 
 JAZZMIN_SETTINGS = {
@@ -49,17 +49,36 @@ JAZZMIN_SETTINGS = {
     "site_logo_classes": "img-thumbnail",
     "user_avatar": "avatar",
     "custom_css": "css/custom_admin.css",
-    "hide_models": ["apis_.PurchaseDetail", "apis_.WorkingDayResource"],
+    "hide_models": ["apis_.PurchaseDetail", "apis_.WorkingDayResource", "apis_.Kpi"],
+    "hide_apps": ["django_plotly_dash"],
     "icons": {
         "apis_.Article": "fa-solid fa-tag",
         "apis_.Collaborator": "fa-solid fa-user-tie",
+        "apis_.Provider": "fa-solid fa-truck-arrow-right",
+        "apis_.Workshop": "fa-solid fa-toolbox",
+        "apis_.Customer": "fa-solid fa-handshake-simple",
         "apis_.Purchase": "fa-solid fa-cart-shopping",
         "apis_.ToolMaintenance": "fa-solid fa-screwdriver-wrench",
         "apis_.CustomUser": "fa-solid fa-user",
-        "apis_.WorkingDay": "fas fa-calendar-day",
-        "apis_.Task": "fas fa-calendar-day",
+        "apis_.WorkingDay": "fas fa-calendar-check",
+        "apis_.Task": "fas fa-list-check",
         "apis_.SaleProduct": "fa-solid fa-money-bill-trend-up",
+        "apis_.Kpi": "fa-solid fa-chart-simple",
     },
+    "order_with_respect_to": [
+        "apis_.SaleProduct",
+        "apis_.WorkingDay",
+        "apis_.Purchase",
+        "apis_.ToolMaintenance",
+        "apis_.Collaborator",
+        "apis_.Workshop",
+        "apis_.Customer",
+        "apis_.Task",
+        "apis_.Article",
+        "apis_.Provider",
+        "apis_.CustomUser",
+        "apis_.Kpi",
+    ],
     # "custom_links": {
     #     "apis_": [{
     #             "name": "Artículos",
@@ -77,7 +96,7 @@ JAZZMIN_UI_TWEAKS = {
 
 AUTH_USER_MODEL = "apis_.CustomUser"
 # Application definition
-
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
@@ -88,6 +107,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'apis_',
+    'django_plotly_dash',
 ]
 
 MIDDLEWARE = [

@@ -23,5 +23,6 @@ router.register(r'sale-products', SaleProductViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('dash/', include('django_plotly_dash.urls')),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

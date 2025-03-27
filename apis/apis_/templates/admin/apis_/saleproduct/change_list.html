@@ -1,0 +1,27 @@
+{% extends "admin/change_list.html" %}
+
+{% block result_list %}
+    <div class="reports">
+        <div>
+            <h5>TOTAL</h5>
+            <p><strong>S/. </strong> {{ total_total }}</p>
+        </div>
+        <div>
+            <h5>DESCUENTO</h5>
+            <p><strong>S/. </strong> {{ total_discount }}</p>
+        </div>
+        <div>
+            <h5>TOTAL NETO</h5>
+            <p><strong>S/. </strong> {{ total_payneto }}</p>
+        </div>
+        <div>
+            <h5>COBRADO</h5>
+            <p><strong>S/. </strong> {{ total_paid }}</p>
+        </div>
+        <div>
+            <h5>POR COBRAR</h5>
+            <p><strong>S/. </strong> {{ total_balance }}</p>
+        </div>
+    </div>
+    {{ block.super }}  {# Esto asegura que la tabla de resultados se siga renderizando #}
+{% endblock %}

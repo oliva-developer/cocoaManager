@@ -1,12 +1,26 @@
 from django.db import models
 from django.utils.timezone import now
 from django.contrib.auth.models import User, AbstractUser
-
-class Collaborator(models.Model):
+from decimal import Decimal
+    
+class Person(models.Model):
     firstname = models.CharField(max_length=100, verbose_name="Nombres")
     lastname = models.CharField(max_length=100, verbose_name="Apellidos")
     phone = models.CharField(max_length=15, verbose_name="Celular")
-
+    address = models.CharField(max_length=50, null= True, blank=True,verbose_name="Dirección")
+    
+    class Meta:
+        abstract = True
+        
+class Entity(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Nombre")
+    phone = models.CharField(max_length=15, verbose_name="Celular")
+    city = models.CharField(max_length=50, null= True, blank=True,verbose_name="Ciudad")
+    
+    class Meta:
+        abstract = True
+    
+class Collaborator(Person):
     class Meta:
         verbose_name = "Colaborador"
         verbose_name_plural = "Colaboradores"
@@ -14,6 +28,30 @@ class Collaborator(models.Model):
     def __str__(self):
         return f"{self.firstname} {self.lastname}"
 
+class Customer(Entity):
+    class Meta:
+        verbose_name = "Cliente"
+        verbose_name_plural = "Clientes" 
+        
+    def __str__(self):
+        return f"{self.name}"
+         
+class Provider(Entity):
+    class Meta:
+        verbose_name = "Proveedor"
+        verbose_name_plural = "Proveedores"  
+        
+    def __str__(self):
+        return f"{self.name}"
+    
+class Workshop(Entity):
+    class Meta:
+        verbose_name = "Taller"
+        verbose_name_plural = "Talleres"  
+        
+    def __str__(self):
+        return f"{self.name}"
+    
 class Task(models.Model):
     name = models.CharField(max_length=255, verbose_name="Nombre")
     pay_per_day = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Pago por día")
@@ -32,7 +70,7 @@ class Article(models.Model):
     ]
     name = models.CharField(max_length=255, verbose_name="Nombre")
     um = models.CharField(max_length=50, verbose_name="Unidad de Medida")  # Unidad de medida
-    stock = models.DecimalField(max_digits=5, decimal_places=2, default=0.00,verbose_name="Existencias")
+    stock = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"),verbose_name="Existencias")
     type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='product', verbose_name="Tipo")
 
     class Meta:
@@ -43,11 +81,11 @@ class Article(models.Model):
         return f"{self.name} ({self.get_type_display()})"
     
 class Purchase(models.Model):
-    provider = models.CharField(max_length=100, verbose_name="Proveedor")
+    provider = models.ForeignKey(Provider, on_delete=models.SET_NULL, null=True, blank=True,related_name='Sales', verbose_name="Proveedor")    
     date = models.DateTimeField(default=now, verbose_name="Fecha de compra")
-    paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Monto Pagado")
-    total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Monto Total")
-    is_paid = models.BooleanField(default=True, verbose_name="Pagado")
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Total")
+    is_paid = models.BooleanField(default=True, verbose_name="Cancelado")
+    paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Pagado")
 
     class Meta:
         verbose_name = "Compra"
@@ -70,31 +108,32 @@ class PurchaseDetail(models.Model):
         return f"{self.units} x {self.article.name} en {self.purchase}"
     
 class ToolMaintenance (models.Model):
-    provider = models.CharField(max_length=100,blank=True, null=True, verbose_name="Técnico")
+    date = models.DateTimeField(default=now, verbose_name="Fecha")
+    workshop = models.ForeignKey(Workshop, on_delete=models.SET_NULL, null=True, blank=True,related_name='maintenances', verbose_name="Taller")
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='maintenances', verbose_name="Herramienta")
+    desc = models.CharField(max_length=255, null=True, blank=True, verbose_name="Detalle")
     cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo")
-    date = models.DateTimeField(default=now, verbose_name="Fecha de Reparación")
+    is_paid = models.BooleanField(default=True, verbose_name="Cancelado")
+    paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Pagado")
     
     class Meta:
         verbose_name = "Mantenimiento"
         verbose_name_plural = "Mantenimientos"
         
     def __str__(self):
-        return f"{self.article} atendido por {self.provider}"
+        return f"{self.article} atendido por {self.workshop}"
     
 class WorkingDay(models.Model):
+    date = models.DateTimeField(default=now, verbose_name="Fecha de Jornada")
     collaborator = models.ForeignKey(Collaborator, on_delete=models.CASCADE, verbose_name="Colaborador")
     task = models.ForeignKey(Task, on_delete=models.CASCADE, verbose_name="Tarea")
-    discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Descuento")
-    pay = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Pago")
-    paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Monto Pagado")
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Monto Pendiente")
+    tariff = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Tarifa")
     use_own_tool = models.BooleanField(default=True, verbose_name="Usa Herramienta Propia")
-    tool_discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Descuento por herramienta")
-    is_done = models.BooleanField(default=False, verbose_name="Concluida")
+    discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Descuento")
     is_canceled = models.BooleanField(default=False, verbose_name="Cancelada")
+    paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Pagado")
+    is_done = models.BooleanField(default=False, verbose_name="Concluida")
     observation = models.TextField(null=True, blank=True, verbose_name="Observacion")
-    date = models.DateTimeField(default=now, verbose_name="Fecha de Jornada")
 
     class Meta:
         verbose_name = "Jornada de Trabajo"
@@ -106,7 +145,7 @@ class WorkingDay(models.Model):
 class WorkingDayResource(models.Model):
     working_day = models.ForeignKey(WorkingDay, on_delete=models.CASCADE, verbose_name="Jornada laboral", related_name="resources")
     article = models.ForeignKey(Article, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Recurso")
-    units = models.DecimalField(max_digits=5, decimal_places=2, default=0.00,verbose_name="Cantidad")
+    units = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"),verbose_name="Cantidad")
     
     
     class Meta:
@@ -117,15 +156,19 @@ class WorkingDayResource(models.Model):
         return f"En {self.working_day} se uso {self.units} de {self.article}"
     
 class SaleProduct(models.Model):
-    client = models.CharField(max_length=100, verbose_name="Cliente", default="Ninguno")
-    kilos = models.IntegerField(default=1, verbose_name="kilos")
-    price_kilo = models.DecimalField(max_digits=18, decimal_places=2, default=1.00, verbose_name="Precio de Kilo")
-    total = models.DecimalField(max_digits=18, decimal_places=2, default=1.00, verbose_name="Monto")
-    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Descuento")
+    date = models.DateTimeField(default=now, verbose_name="Fecha")
+    client = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='shoppings', verbose_name="Cliente")
+    kilos = models.DecimalField(max_digits=18, decimal_places=3, default=Decimal("0.00"), verbose_name="kilos")
+    price_kilo = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Precio de Kilo S/")
+    discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,default=Decimal("0.00"), verbose_name="Descuento S/")
+    discount_reazon = models.CharField(max_length=200,blank=True, null=True, verbose_name="Motivo de Descuento")
+    total = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Valor Neto S/")
+    is_paid = models.BooleanField(default=False, verbose_name="Pago Completo S/")
+    charged = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Recibido S/")
     
     class Meta:
-        verbose_name = "Venta de Producto"
-        verbose_name_plural = "Ventas de Producto"
+        verbose_name = "Venta"
+        verbose_name_plural = "Ventas"
         
     def __str__(self):
         return f"A {self.client} se vendio {self.kilos} kilos de cacao por un total de {self.total} soles"
@@ -139,3 +182,13 @@ class CustomUser(AbstractUser):
         
     def __str__(self):
         return f"{self.username}"
+
+class Kpi(models.Model):
+    name = models.CharField(max_length=20,null=True, blank=True)
+    
+    class Meta:
+        verbose_name = "Indicador"
+        verbose_name_plural = "Indicadores"  
+        
+    def __str__(self):
+        return f"{self.name}"

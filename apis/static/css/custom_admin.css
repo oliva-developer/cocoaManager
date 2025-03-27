@@ -32,6 +32,17 @@ nav .nav li:nth-child(2){
 }
 #jazzy-navbar {
 }
+
+/* Cabecera de tabla*/
+thead th{
+    /* text-align: center; */
+}
 th .text a, th .text span{
     color: #0d1117 !important
+}
+.reports{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
 }
