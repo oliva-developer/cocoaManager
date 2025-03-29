@@ -6,9 +6,6 @@ document.addEventListener("DOMContentLoaded", function(){
     cost = document.querySelector("#id_cost")
     ispaid = document.querySelector("#id_is_paid")
     paid = document.querySelector("#id_paid")
-    total_net = document.querySelector("#id_total_net")
-    ispaid = document.querySelector("#id_is_paid")
-    paid = document.querySelector("#id_paid")
 
     setTimeout(function(){
         initCost()
