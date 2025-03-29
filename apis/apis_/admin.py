@@ -18,7 +18,7 @@ from decimal import Decimal
 
 # CONFIGS
 locale.setlocale(locale.LC_TIME, 'es_ES.utf8') # Asegurar que los nombres de días estén en español linux
-locale.setlocale(locale.LC_TIME, 'Spanish_Spain.1252') # Asegurar que los nombres de días estén en español windows
+#locale.setlocale(locale.LC_TIME, 'Spanish_Spain.1252') # Asegurar que los nombres de días estén en español windows
 admin.site.unregister(Group)
 
 # FORMS
