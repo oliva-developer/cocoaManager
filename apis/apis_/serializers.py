@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     Collaborator, Task, Article, Purchase, PurchaseDetail, 
-    ToolMaintenance, WorkingDay, WorkingDayResource, SaleProduct
+    ToolMaintenance, WorkingDay, SaleProduct
 )
 
 class CollaboratorSerializer(serializers.ModelSerializer):
@@ -41,11 +41,6 @@ class WorkingDaySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = WorkingDay
-        fields = '__all__'
-
-class WorkingDayResourceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = WorkingDayResource
         fields = '__all__'
 
 class SaleProductSerializer(serializers.ModelSerializer):

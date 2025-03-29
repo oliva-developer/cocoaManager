@@ -19,6 +19,10 @@
     height: 4rem;
     object-fit: cover;
 }
+form h6 {
+    margin-top: 1rem;
+} 
+
 /* Panel de Administración*/
 nav .nav li:first-child{
     display: none;

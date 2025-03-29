@@ -49,8 +49,12 @@ JAZZMIN_SETTINGS = {
     "site_logo_classes": "img-thumbnail",
     "user_avatar": "avatar",
     "custom_css": "css/custom_admin.css",
-    "hide_models": ["apis_.PurchaseDetail", "apis_.WorkingDayResource", "apis_.Kpi"],
+    "hide_models": ["apis_.PurchaseDetail", "apis_.Kpi"],
     "hide_apps": ["django_plotly_dash"],
+    "changeform_format": "single", 
+    "form_controls": {
+        "align": "bottom",
+    },
     "icons": {
         "apis_.Article": "fa-solid fa-tag",
         "apis_.Collaborator": "fa-solid fa-user-tie",

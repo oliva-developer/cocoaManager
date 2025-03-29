@@ -27,7 +27,7 @@ logs/
 **/migrations/*.pyc
 
 # Archivos estáticos y de usuario
-staticfiles/
+**/media/
 # media/
 
 # Archivos de dependencias

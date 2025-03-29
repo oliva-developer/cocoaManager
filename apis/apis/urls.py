@@ -4,7 +4,7 @@ from rest_framework import routers
 from apis_.views import (
     CollaboratorViewSet, TaskViewSet, ArticleViewSet, PurchaseViewSet,
     PurchaseDetailViewSet, ToolMaintenanceViewSet, WorkingDayViewSet,
-    WorkingDayResourceViewSet, SaleProductViewSet
+    SaleProductViewSet
 )
 from django.conf.urls.static import static
 from django.conf import settings
@@ -17,7 +17,6 @@ router.register(r'purchases', PurchaseViewSet)
 router.register(r'purchase-details', PurchaseDetailViewSet)
 router.register(r'tool-maintenances', ToolMaintenanceViewSet)
 router.register(r'working-days', WorkingDayViewSet)
-router.register(r'working-day-resources', WorkingDayResourceViewSet)
 router.register(r'sale-products', SaleProductViewSet)
 
 urlpatterns = [

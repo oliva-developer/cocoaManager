@@ -54,14 +54,14 @@ class Workshop(Entity):
     
 class Task(models.Model):
     name = models.CharField(max_length=255, verbose_name="Nombre")
-    pay_per_day = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Pago por día")
+    tariff_per_day = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Tarifa diaria")
 
     class Meta:
         verbose_name = "Tarea"
         verbose_name_plural = "Tareas"
         
     def __str__(self):
-        return self.name
+        return f"{self.name}"
 
 class Article(models.Model):
     TYPE_CHOICES = [
@@ -81,11 +81,11 @@ class Article(models.Model):
         return f"{self.name} ({self.get_type_display()})"
     
 class Purchase(models.Model):
-    provider = models.ForeignKey(Provider, on_delete=models.SET_NULL, null=True, blank=True,related_name='Sales', verbose_name="Proveedor")    
-    date = models.DateTimeField(default=now, verbose_name="Fecha de compra")
-    total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Total")
-    is_paid = models.BooleanField(default=True, verbose_name="Cancelado")
-    paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Pagado")
+    provider = models.ForeignKey(Provider, on_delete=models.SET_NULL, null=True, blank=True, related_name='Sales', verbose_name="Proveedor")    
+    date = models.DateField(default=now, verbose_name="Fecha")
+    total = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Total")
+    is_paid = models.BooleanField(default=False, verbose_name="Cancelada")
+    paid = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Pagado")
 
     class Meta:
         verbose_name = "Compra"
@@ -96,9 +96,10 @@ class Purchase(models.Model):
     
 class PurchaseDetail(models.Model):
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE, related_name='details', verbose_name="Compra")
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="purchases", verbose_name="Articulo")
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="purchases", verbose_name="Artículo")
     unit_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo unitario")
-    units = models.IntegerField(verbose_name="Cantidad")
+    units = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Cantidad")
+    charge = models.DecimalField(max_digits=10, decimal_places=2, default= Decimal("0.00"), verbose_name="Importe")
     
     class Meta:
         verbose_name = "Detalle de Compra"
@@ -108,12 +109,12 @@ class PurchaseDetail(models.Model):
         return f"{self.units} x {self.article.name} en {self.purchase}"
     
 class ToolMaintenance (models.Model):
-    date = models.DateTimeField(default=now, verbose_name="Fecha")
+    date = models.DateField(default=now, verbose_name="Fecha")
     workshop = models.ForeignKey(Workshop, on_delete=models.SET_NULL, null=True, blank=True,related_name='maintenances', verbose_name="Taller")
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='maintenances', verbose_name="Herramienta")
     desc = models.CharField(max_length=255, null=True, blank=True, verbose_name="Detalle")
     cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Costo")
-    is_paid = models.BooleanField(default=True, verbose_name="Cancelado")
+    is_paid = models.BooleanField(default=False, verbose_name="Cancelado")
     paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Pagado")
     
     class Meta:
@@ -124,48 +125,30 @@ class ToolMaintenance (models.Model):
         return f"{self.article} atendido por {self.workshop}"
     
 class WorkingDay(models.Model):
-    date = models.DateTimeField(default=now, verbose_name="Fecha de Jornada")
-    collaborator = models.ForeignKey(Collaborator, on_delete=models.CASCADE, verbose_name="Colaborador")
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, verbose_name="Tarea")
-    tariff = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Tarifa")
-    use_own_tool = models.BooleanField(default=True, verbose_name="Usa Herramienta Propia")
-    discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Descuento")
-    is_canceled = models.BooleanField(default=False, verbose_name="Cancelada")
-    paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Pagado")
-    is_done = models.BooleanField(default=False, verbose_name="Concluida")
-    observation = models.TextField(null=True, blank=True, verbose_name="Observacion")
+    date = models.DateField(default=now, verbose_name="Fecha")
+    collaborator = models.ForeignKey(Collaborator, on_delete=models.SET_NULL, null=True, blank=True, related_name="workingdays",verbose_name="Colaborador")
+    task = models.ForeignKey(Task, on_delete=models.SET_NULL, null=True, blank=True, related_name="workings",verbose_name="Tarea")
+    total_net = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Tarifa S/")
+    is_paid = models.BooleanField(default=False, verbose_name="Cancelada")
+    paid = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), verbose_name="Pagado S/")
 
     class Meta:
-        verbose_name = "Jornada de Trabajo"
-        verbose_name_plural = "Jornadas de Trabajo"
+        verbose_name = "Jornada Laboral"
+        verbose_name_plural = "Jornadas Laborales"
         
     def __str__(self):
-        return f"{self.collaborator} - {self.task} ({self.date.strftime('%Y-%m-%d')})"
-
-class WorkingDayResource(models.Model):
-    working_day = models.ForeignKey(WorkingDay, on_delete=models.CASCADE, verbose_name="Jornada laboral", related_name="resources")
-    article = models.ForeignKey(Article, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Recurso")
-    units = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"),verbose_name="Cantidad")
-    
-    
-    class Meta:
-        verbose_name = "Recurso de Jornada de Trabajo"
-        verbose_name_plural = "Recursos de Jornadas de Trabajo"
-        
-    def __str__(self):
-        return f"En {self.working_day} se uso {self.units} de {self.article}"
+        return f"{self.collaborator}  {self.task} {self.date.strftime('%Y-%m-%d')}"
     
 class SaleProduct(models.Model):
-    date = models.DateTimeField(default=now, verbose_name="Fecha")
+    date = models.DateField(default=now, verbose_name="Fecha")
     client = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='shoppings', verbose_name="Cliente")
-    kilos = models.DecimalField(max_digits=18, decimal_places=3, default=Decimal("0.00"), verbose_name="kilos")
-    price_kilo = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Precio de Kilo S/")
-    discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,default=Decimal("0.00"), verbose_name="Descuento S/")
-    discount_reazon = models.CharField(max_length=200,blank=True, null=True, verbose_name="Motivo de Descuento")
-    total = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Valor Neto S/")
-    is_paid = models.BooleanField(default=False, verbose_name="Pago Completo S/")
-    charged = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Recibido S/")
-    
+    units = models.DecimalField(max_digits=18, decimal_places=3, default=Decimal("0.00"), verbose_name="Cantidad (Kilos)")
+    price_unit = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Precio (Kilo) S/")
+    total_net = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Generado S/")
+    is_paid = models.BooleanField(default=False, verbose_name="Cancelada")
+    paid = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"), verbose_name="Ingresado S/")
+    observation = models.CharField(max_length=200,blank=True, null=True, verbose_name="Observación")
+
     class Meta:
         verbose_name = "Venta"
         verbose_name_plural = "Ventas"

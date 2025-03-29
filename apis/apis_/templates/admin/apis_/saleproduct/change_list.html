@@ -3,23 +3,15 @@
 {% block result_list %}
     <div class="reports">
         <div>
-            <h5>TOTAL</h5>
-            <p><strong>S/. </strong> {{ total_total }}</p>
+            <h5>GENERADO</h5>
+            <p><strong>S/. </strong> {{ total_net }}</p>
         </div>
         <div>
-            <h5>DESCUENTO</h5>
-            <p><strong>S/. </strong> {{ total_discount }}</p>
-        </div>
-        <div>
-            <h5>TOTAL NETO</h5>
-            <p><strong>S/. </strong> {{ total_payneto }}</p>
-        </div>
-        <div>
-            <h5>COBRADO</h5>
+            <h5>INGRESADO</h5>
             <p><strong>S/. </strong> {{ total_paid }}</p>
         </div>
         <div>
-            <h5>POR COBRAR</h5>
+            <h5>PENDIENTE</h5>
             <p><strong>S/. </strong> {{ total_balance }}</p>
         </div>
     </div>

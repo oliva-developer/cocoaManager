@@ -1,12 +1,11 @@
 from rest_framework import viewsets
 from .models import (
     Collaborator, Task, Article, Purchase, PurchaseDetail, 
-    ToolMaintenance, WorkingDay, WorkingDayResource, SaleProduct
+    ToolMaintenance, WorkingDay, SaleProduct
 )
 from .serializers import (
     CollaboratorSerializer, TaskSerializer, ArticleSerializer, PurchaseSerializer, 
-    PurchaseDetailSerializer, ToolMaintenanceSerializer, WorkingDaySerializer, 
-    WorkingDayResourceSerializer, SaleProductSerializer
+    PurchaseDetailSerializer, ToolMaintenanceSerializer, WorkingDaySerializer, SaleProductSerializer
 )
 
 class CollaboratorViewSet(viewsets.ModelViewSet):
@@ -36,10 +35,6 @@ class ToolMaintenanceViewSet(viewsets.ModelViewSet):
 class WorkingDayViewSet(viewsets.ModelViewSet):
     queryset = WorkingDay.objects.all()
     serializer_class = WorkingDaySerializer
-
-class WorkingDayResourceViewSet(viewsets.ModelViewSet):
-    queryset = WorkingDayResource.objects.all()
-    serializer_class = WorkingDayResourceSerializer
 
 class SaleProductViewSet(viewsets.ModelViewSet):
     queryset = SaleProduct.objects.all()
