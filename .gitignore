@@ -28,6 +28,7 @@ logs/
 
 # Archivos estáticos y de usuario
 **/media/avatars/
+gunicorn.log
 
 # Archivos de dependencias
 pip-log.txt
