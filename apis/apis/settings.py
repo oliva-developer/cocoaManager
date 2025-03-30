@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-a=a_3b@_@1!$l-hcs=7*!n(qix6_1@7m!f0w8vdf6yt^e($8(@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["olypos.com", "localhost:8000"]
+ALLOWED_HOSTS = ["olypos.com", "127.0.0.1"]
 
 # JAZZMIN CONFIG
 STATICFILES_DIRS = [
