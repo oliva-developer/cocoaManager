@@ -30,7 +30,9 @@ nav .nav li:first-child{
 nav .nav li:nth-child(2){
     display: none;
 }
-
+footer .float-right.d-none.d-sm-inline{
+    display: none !important;
+}
 .nav-sidebar>.nav-item {
     margin-right:  0 !important;
 }

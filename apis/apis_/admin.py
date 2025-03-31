@@ -21,11 +21,22 @@ from django.http import HttpResponse
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
 from datetime import datetime
+import platform
 
-# CONFIGS
-#locale.setlocale(locale.LC_TIME, 'es_ES.utf8') # Asegurar que los nombres de días estén en español linux
-locale.setlocale(locale.LC_TIME, 'spanish') # Asegurar que los nombres de días estén en español windows
-admin.site.unregister(Group)
+# Detectar el sistema operativo
+sistema_operativo = platform.system()
+
+# Configurar locale según el sistema operativo
+if sistema_operativo == "Linux":
+    locale.setlocale(locale.LC_TIME, 'es_ES.utf8')
+    locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
+    locale.setlocale(locale.LC_MONETARY, 'es_PE.utf8')
+elif sistema_operativo == "Windows":
+    locale.setlocale(locale.LC_TIME, 'Spanish')
+    locale.setlocale(locale.LC_NUMERIC, 'English_United States.1252')
+    locale.setlocale(locale.LC_MONETARY, 'Spanish_Peru.1252')
+else:
+    print("Sistema operativo no reconocido, no se aplicó locale.")
 
 # ACTIONS
 from collections import defaultdict
@@ -223,6 +234,8 @@ class PurchaseDetailInline(admin.TabularInline):
     verbose_name = "Articulo"
     
 # PAGES
+admin.site.unregister(Group)
+
 @admin.register(Collaborator)
 class CollaboratorAdmin(admin.ModelAdmin):
     list_display = ('firstname', 'lastname', 'phone')
@@ -262,7 +275,7 @@ class ArticleAdmin(admin.ModelAdmin):
 class PurchaseAdmin(admin.ModelAdmin):
     form = PurchaseForm 
     fields = ['date', 'provider', 'total', 'is_paid', 'paid']
-    list_display = ('provider', 'date_format', 'get_details_names', 'delete_link')
+    list_display = ('provider', 'date_format', 'total_format', 'paid_format', 'balance', 'get_details_names', 'delete_link')
     search_fields = ('provider__name',)
     list_filter = ('provider','date',)
     # readonly_fields= ("total",)
@@ -270,6 +283,19 @@ class PurchaseAdmin(admin.ModelAdmin):
     list_per_page = 20
     ordering = ['-date']  
     actions = None 
+    
+    @admin.display(description='Total')
+    def total_format(self, obj):
+        return locale.currency(obj.total, grouping=True)
+
+    @admin.display(description='Pagado')
+    def paid_format(self, obj):
+        return locale.currency(obj.paid, grouping=True)
+    
+    @admin.display(description='Pendiente')
+    def balance(self, obj):
+        balance = (obj.total or 0) - (obj.paid or 0)
+        return locale.currency(balance, grouping=True)  
     
     @admin.display(description='Articulos')
     def get_details_names(self, obj):
@@ -289,12 +315,12 @@ class PurchaseAdmin(admin.ModelAdmin):
                 for item in queryset
             )
             
-            total_payneto = sum(item.total or 0 for item in queryset)
-            total_paid = sum(item.paid or 0 for item in queryset) 
-            total_balance = "{:,.2f}".format(total_balance_).replace(",", "X").replace(".", ",").replace("X", ".") 
-
+            total_net = locale.currency(sum(item.total or 0 for item in queryset), grouping=True)
+            total_paid =  locale.currency(sum(item.paid or 0 for item in queryset), grouping=True)
+            total_balance = locale.currency(total_balance_, grouping=True)
+            
             extra_context = extra_context or {}
-            extra_context['total_payneto'] = total_payneto
+            extra_context['total_net'] = total_net
             extra_context['total_paid'] = total_paid
             extra_context['total_balance'] = total_balance
             response.context_data.update(extra_context)
@@ -322,14 +348,26 @@ class PurchaseDetailAdmin(admin.ModelAdmin):
 @admin.register(ToolMaintenance)
 class ToolMaintenanceAdmin(admin.ModelAdmin):
     form = ToolMaintenanceForm
-    list_display = ('workshop', 'article', 'desc','date_format', 'cost', 'paid', 'balance', 'is_paid','delete_link')
+    list_display = ('workshop', 'date_format', 'article', 'desc', 'cost_format', 'paid_format', 'balance', 'is_paid','delete_link')
     search_fields = ('workshop__name', 'article__name')
     list_filter = ('workshop', 'article', 'is_paid')
     list_per_page = 20
     ordering = ['-date']  
     actions = None 
     
+    @admin.display(description='Tarifa')
+    def cost_format(self, obj):
+        return locale.currency(obj.cost, grouping=True)
+
+    @admin.display(description='Pagado')
+    def paid_format(self, obj):
+        return locale.currency(obj.paid, grouping=True)
     
+    @admin.display(description='Pendiente')
+    def balance(self, obj):
+        balance = (obj.cost or 0) - (obj.paid or 0)
+        return locale.currency(balance, grouping=True)  
+       
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context=extra_context)
 
@@ -343,9 +381,9 @@ class ToolMaintenanceAdmin(admin.ModelAdmin):
                 for item in queryset
             )
             
-            total_cost = sum(item.cost or 0 for item in queryset)
-            total_paid = sum(item.paid or 0 for item in queryset) 
-            total_balance = "{:,.2f}".format(total_balance_).replace(",", "X").replace(".", ",").replace("X", ".") 
+            total_cost = locale.currency(sum(item.cost or 0 for item in queryset), grouping=True)
+            total_paid =  locale.currency(sum(item.paid or 0 for item in queryset), grouping=True)
+            total_balance = locale.currency(total_balance_, grouping=True)
 
             extra_context = extra_context or {}
             extra_context['total_cost'] = total_cost
@@ -359,13 +397,6 @@ class ToolMaintenanceAdmin(admin.ModelAdmin):
     def date_format(self, obj):
         return obj.date.strftime('%A %d/%m/%Y').capitalize()
     date_format.admin_order_field = 'date'
-    
-    @admin.display(description='Saldo')
-    def balance(self, obj):
-        cost = obj.cost or 0
-        paid = obj.paid or 0
-        balance = cost - paid
-        return "{:,.2f}".format(balance).replace(",", "X").replace(".", ",").replace("X", ".")
 
     def delete_link(self, obj):
         return format_html(
@@ -379,19 +410,25 @@ class ToolMaintenanceAdmin(admin.ModelAdmin):
 class WorkingDayAdmin(admin.ModelAdmin):
     form = WorkingDayForm
     fields = ['date', 'collaborator', 'task','total_net','is_paid', 'paid',]
-    list_display = ('collaborator', 'date_format','task','total_net', 'paid', 'balance', 'is_paid', 'delete_link')
+    list_display = ('collaborator', 'date_format','task','total_net_format', 'paid_format', 'balance', 'is_paid', 'delete_link')
     search_fields = ('collaborator__firstname', 'task__name',)
     list_filter = ('date', ('collaborator', RelatedOnlyFieldListFilter), 'task', 'is_paid')
     list_per_page = 20
     ordering = ['-date']  
     actions = [exp_pdf_workingday] 
     
+    @admin.display(description='Tarifa')
+    def total_net_format(self, obj):
+        return locale.currency(obj.total_net, grouping=True)
+
+    @admin.display(description='Pagado')
+    def paid_format(self, obj):
+        return locale.currency(obj.total_net, grouping=True)
+    
     @admin.display(description='Saldo')
     def balance(self, obj):
-        total_net = obj.total_net or 0
-        paid = obj.paid or 0
-        balance = total_net - paid
-        return "{:,.2f}".format(balance).replace(",", "X").replace(".", ",").replace("X", ".")
+        balance = (obj.total_net or 0) - (obj.paid or 0)
+        return locale.currency(balance, grouping=True)
     
     @admin.display(description='Fecha')
     def date_format(self, obj):
@@ -418,9 +455,9 @@ class WorkingDayAdmin(admin.ModelAdmin):
                     for item in queryset
                 )
                 
-                total_net = "{:,.2f}".format(total_net).replace(",", "X").replace(".", ",").replace("X", ".")
-                total_paid = "{:,.2f}".format(total_paid).replace(",", "X").replace(".", ",").replace("X", ".")
-                total_balance = "{:,.2f}".format(total_balance_).replace(",", "X").replace(".", ",").replace("X", ".")
+                total_net = locale.currency(sum(item.total_net or 0 for item in queryset), grouping=True)
+                total_paid =  locale.currency(sum(item.paid or 0 for item in queryset), grouping=True)
+                total_balance = locale.currency(total_balance_, grouping=True)
 
                 extra_context = extra_context or {}
                 extra_context['total_net'] = total_net
@@ -442,24 +479,30 @@ class WorkingDayAdmin(admin.ModelAdmin):
 class SaleProductAdmin(admin.ModelAdmin):
     form = SaleProductForm
     fields = ["date", "client", "units", "price_unit", "total_net", "is_paid", "paid"]
-    list_display = ('client', 'date_format','units', 'price_unit', 'total_net', 'paid', 'balance', 'is_paid','delete_link')
+    list_display = ('client', 'date_format','units', 'price_unit', 'total_net_format', 'paid_format', 'balance', 'is_paid','delete_link')
     search_fields = ('client__name', )
     list_filter = ('client', 'date', 'is_paid')
     list_per_page = 20
     ordering = ['-date']  
     actions = None
     
+    @admin.display(description='Tarifa')
+    def total_net_format(self, obj):
+        return locale.currency(obj.total_net, grouping=True)
+
+    @admin.display(description='Pagado')
+    def paid_format(self, obj):
+        return locale.currency(obj.paid, grouping=True)
+    
+    @admin.display(description='Pendiente')
+    def balance(self, obj):
+        balance = (obj.total_net or 0) - (obj.paid or 0)
+        return locale.currency(balance, grouping=True)  
+     
     @admin.display(description='Fecha')
     def date_format(self, obj):
         return obj.date.strftime('%A %d/%m/%Y').capitalize()
     date_format.admin_order_field = 'date'
-    
-    @admin.display(description='Pendiente S/')
-    def balance(self, obj):
-        total_net = obj.total_net or 0
-        paid = obj.paid or 0
-        balance = total_net - paid
-        return "{:,.2f}".format(balance).replace(",", "X").replace(".", ",").replace("X", ".")
     
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context=extra_context)
@@ -473,9 +516,9 @@ class SaleProductAdmin(admin.ModelAdmin):
                 for item in queryset
             )
             
-            total_net = sum(item.total_net or 0 for item in queryset)
-            total_paid = sum(item.paid or 0 for item in queryset) 
-            total_balance = "{:,.2f}".format(total_balance_).replace(",", "X").replace(".", ",").replace("X", ".")
+            total_net = locale.currency(sum(item.total_net or 0 for item in queryset), grouping=True)
+            total_paid =  locale.currency(sum(item.paid or 0 for item in queryset), grouping=True)
+            total_balance = locale.currency(total_balance_, grouping=True)
             
 
             extra_context = extra_context or {}

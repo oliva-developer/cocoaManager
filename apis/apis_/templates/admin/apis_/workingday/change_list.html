@@ -4,15 +4,15 @@
     <div class="reports">
         <div>
             <h5>PAGAR</h5>
-            <p><strong>S/. </strong> {{ total_net }}</p>
+            <p>{{ total_net }}</p>
         </div>
         <div>
             <h5>PAGADO</h5>
-            <p><strong>S/. </strong> {{ total_paid }}</p>
+            <p>{{ total_paid }}</p>
         </div>
         <div>
             <h5>SALDO</h5>
-            <p><strong>S/. </strong> {{ total_balance }}</p>
+            <p>{{ total_balance }}</p>
         </div>
     </div>
     {{ block.super }}  {# Esto asegura que la tabla de resultados se siga renderizando #}
