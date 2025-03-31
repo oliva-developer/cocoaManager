@@ -154,7 +154,7 @@ class SaleProduct(models.Model):
         verbose_name_plural = "Ventas"
         
     def __str__(self):
-        return f"A {self.client} se vendio {self.kilos} kilos de cacao por un total de {self.total} soles"
+        return f"A {self.client} se vendio {self.units} kilos de cacao por un total de {self.total_net} soles"
 
 class CustomUser(AbstractUser):
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
