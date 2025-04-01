@@ -423,7 +423,7 @@ class WorkingDayAdmin(admin.ModelAdmin):
 
     @admin.display(description='Pagado')
     def paid_format(self, obj):
-        return locale.currency(obj.total_net, grouping=True)
+        return locale.currency(obj.paid, grouping=True)
     
     @admin.display(description='Saldo')
     def balance(self, obj):
